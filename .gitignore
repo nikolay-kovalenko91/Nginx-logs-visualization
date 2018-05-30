@@ -1,0 +1,28 @@
+# Virutalenv, installed Python and Node modules and directories
+.env
+/local
+/lib
+/lib64
+/bin
+/include
+/share
+/node_modules
+/public
+/restkit
+/socketpool
+/ghostdriver.log
+/selenium
+/myvenv
+__pycache__
+*.pyc
+
+# Developer tools
+.svn
+.idea
+.directory
+.vscode
+.history
+geckodriver.log
+
+#Local files
+report.html
