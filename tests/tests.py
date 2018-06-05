@@ -12,13 +12,13 @@ TEST_CONFIG = {
 }
 
 
-# @unittest.skip("just for developing")
+#@unittest.skip("just for developing")
 class TestApp(unittest.TestCase):
     """
     An integration test
     """
     _TEST_LOG_NAME = 'nginx-access-ui.log-20170630'
-    _TEST_REPORT_NAME = 'report-20170630.html'
+    _TEST_REPORT_NAME = 'report-2017.06.30.html'
     _TESTS_RUNNING_DIR = TEST_CONFIG['TESTS_RUNNING_DIR']
     _CONFIG_NAME = TEST_CONFIG['CONFIG_NAME']
 
@@ -43,7 +43,7 @@ class TestApp(unittest.TestCase):
             dir=self.test_environment.get_report_dir(),
             report_name=self._TEST_REPORT_NAME)
         report_content = read_file(report_path)
-        # read appropriate content
+        #TODO: read appropriate content
         self.assertIn(
             "<td>hello!<td>\n",
             report_content
@@ -85,7 +85,7 @@ class TestLogfile(unittest.TestCase):
         log_dir = self.test_environment.get_log_dir()
         report_dir = self.test_environment.get_report_dir()
         log_files_handler = LogFilesHandler(log_dir=log_dir, report_dir=report_dir)
-        returned_log_content = log_files_handler.get_file_to_parse()
+        returned_log_content = log_files_handler.get_file_to_parse().content
 
         self.assertListEqual(expected_log_content, list(returned_log_content))
 
@@ -101,7 +101,7 @@ class TestLogfile(unittest.TestCase):
         log_dir = self.test_environment.get_log_dir()
         report_dir = self.test_environment.get_report_dir()
         log_files_handler = LogFilesHandler(log_dir=log_dir, report_dir=report_dir)
-        returned_log_content = log_files_handler.get_file_to_parse()
+        returned_log_content = log_files_handler.get_file_to_parse().content
 
         self.assertListEqual(expected_log_content, list(returned_log_content))
 

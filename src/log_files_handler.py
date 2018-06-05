@@ -38,7 +38,7 @@ class LogFilesHandler:
             date_string = matching_patterns[0]
             # TODO: Exception handler here
             date = datetime.strptime(date_string, self._LOG_DATETIME_NAME_FORMAT)
-            log_file = LogFileInfo(
+            log_file = LogFile(
                 date=date,
                 path=file_path
             )
@@ -60,6 +60,7 @@ class LogFilesHandler:
             yield line
 
     def _read_file(self, path):
+        # TODO: write a decorator for try/exc
         try:
             with open(path) as file_handler:
                 for line in self._read_lines(file_handler):
@@ -69,20 +70,24 @@ class LogFilesHandler:
 
     def get_file_to_parse(self):
         log_files_paths = self._get_files_paths_of_dir(dir_name=self._log_dir)
-        last_log_file_info = self._get_last_log_path_to_parse(dir_name=self._log_dir, files_paths=log_files_paths)
+        last_log_file = self._get_last_log_path_to_parse(dir_name=self._log_dir, files_paths=log_files_paths)
 
         report_files_paths = self._get_files_paths_of_dir(dir_name=self._report_dir)
-        if self.is_report_exist_for_log(log_file_info=last_log_file_info, files_paths=report_files_paths):
+        if self.is_report_exist_for_log(log_file_info=last_log_file, files_paths=report_files_paths):
             # TODO: Create new exception
             raise ValueError
 
-        return self._read_file(path=last_log_file_info.path)
+        log_content = self._read_file(path=last_log_file.path)
+        last_log_file.content = log_content
+
+        return last_log_file
 
 
-class LogFileInfo:
-    def __init__(self, date, path):
+class LogFile:
+    def __init__(self, date, path, content=None):
         self.date = date
         self.path = path
+        self.content = content
 
     def __repr__(self):
         return self.date.strftime('%m/%d/%Y')

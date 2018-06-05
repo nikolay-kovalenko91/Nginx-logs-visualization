@@ -30,7 +30,7 @@ def main():
     config = default_config
     if config_path:
         config = _get_config(config_path)
-    LogAnalyzer().main(config=config)
+    LogAnalyzer(config=config).main()
 
 
 if __name__ == '__main__':
