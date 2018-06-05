@@ -29,12 +29,17 @@ class TestEnvironment:
         with open(self._config_path, "w") as config_file:
             json.dump(config, config_file, indent=2)
 
-    def create_log_file_and_get_its_path(self, name):
+    def create_log_file_and_get_its_path(self, name, content=None):
         log_dir = self.get_log_dir()
         log_path = '{dir}/{name}'.format(dir=log_dir, name=name)
+        if not content:
+            random_line_1 = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+            random_line_2 = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+            content = [random_line_1 + "\n", random_line_2 + "\n"]
+
         with open(log_path, "w") as log_file:
-            line = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
-            log_file.write(line + "\n")
+            for line in content:
+                log_file.write(line)
         return log_path
 
     def setup_for_app(self):

@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from src.log_files_handler import LogFilesHandler
+from src.report_composer import ReportComposer
 
 
 class LogAnalyzer:
@@ -23,8 +22,9 @@ class LogAnalyzer:
     def main(self):
         log_files_handler = LogFilesHandler(log_dir=self._log_dir, report_dir=self._report_dir)
         log_file_obj = log_files_handler.get_file_to_parse()
-        lines = self.parse_log(content=log_file_obj.content)
+        report_content = self.parse_log(content=log_file_obj.content)
 
-        date_string = log_file_obj.date.strftime('%Y.%m.%d')
-        path = '{dir}/report-{date_string}.html'.format(dir=self._report_dir, date_string=date_string)
-        self._write_report(source=lines, path=path)
+        report_composer = ReportComposer(log_file_obj=log_file_obj,
+                                         report_dir=self._report_dir,
+                                         report_content=report_content)
+        report_composer.compose()

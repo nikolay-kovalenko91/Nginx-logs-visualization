@@ -19,6 +19,11 @@ class TestApp(unittest.TestCase):
     """
     _TEST_LOG_NAME = 'nginx-access-ui.log-20170630'
     _TEST_REPORT_NAME = 'report-2017.06.30.html'
+    _LOG_CONTENT = [
+        '192.168.42.24 - - [31/Oct/2017:20:19:18 +0000] "GET /foo/request/index.php?bar=baz HTTP/1.1" 200 33441 "http://example.com/referer" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36" "-"\n',
+        '192.169.55.12 - - [30/Oct/2017:21:18:00 +0000] "POST /foo/request/index.php HTTP/1.1" 200 33441 "http://example.com/referer" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36" "-"\n',
+    ]
+
     _TESTS_RUNNING_DIR = TEST_CONFIG['TESTS_RUNNING_DIR']
     _CONFIG_NAME = TEST_CONFIG['CONFIG_NAME']
 
@@ -31,7 +36,10 @@ class TestApp(unittest.TestCase):
 
     def setUp(self):
         self.test_environment.setup_for_app()
-        self._log_path = self.test_environment.create_log_file_and_get_its_path(name=self._TEST_LOG_NAME)
+        self._log_path = self.test_environment.create_log_file_and_get_its_path(
+            name=self._TEST_LOG_NAME,
+            content=self._LOG_CONTENT
+        )
 
     def tearDown(self):
         self.test_environment.remove()
@@ -43,9 +51,8 @@ class TestApp(unittest.TestCase):
             dir=self.test_environment.get_report_dir(),
             report_name=self._TEST_REPORT_NAME)
         report_content = read_file(report_path)
-        #TODO: read appropriate content
-        self.assertIn(
-            "<td>hello!<td>\n",
+        self.assertListEqual(
+            self._LOG_CONTENT,
             report_content
         )
 
