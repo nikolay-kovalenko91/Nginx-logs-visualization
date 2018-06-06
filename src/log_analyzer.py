@@ -26,5 +26,5 @@ class LogAnalyzer:
 
         report_composer = ReportComposer(log_file_obj=log_file_obj,
                                          report_dir=self._report_dir,
-                                         report_content=report_content)
+                                         table_content=report_content)
         report_composer.compose()

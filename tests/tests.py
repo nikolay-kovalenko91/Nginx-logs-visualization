@@ -20,8 +20,38 @@ class TestApp(unittest.TestCase):
     _TEST_LOG_NAME = 'nginx-access-ui.log-20170630'
     _TEST_REPORT_NAME = 'report-2017.06.30.html'
     _LOG_CONTENT = [
-        '192.168.42.24 - - [31/Oct/2017:20:19:18 +0000] "GET /foo/request/index.php?bar=baz HTTP/1.1" 200 33441 "http://example.com/referer" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36" "-"\n',
-        '192.169.55.12 - - [30/Oct/2017:21:18:00 +0000] "POST /foo/request/index.php HTTP/1.1" 200 33441 "http://example.com/referer" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36" "-"\n',
+        '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] '
+        '"GET /api/v2/banner/25019354 HTTP/1.1" 200 927 "-" '
+        '"Lynx/2.8.8dev.9 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/2.10.5" "-" '
+        '"1498697422-2190034393-4708-9752759" "dc7161be3" 0.390\n',
+        '1.99.174.176 3b81f63526fa8  - [29/Jun/2017:03:50:22 +0300] '
+        '"GET /api/1/photogenic_banners/list/?server_name=WIN7RB4 HTTP/1.1" 200 12 "-" '
+        '"Python-urllib/2.7" "-" "1498697422-32900793-4708-9752770" "-" 0.133\n',
+        '1.169.137.128 -  - [29/Jun/2017:03:50:22 +0300] '
+        '"GET /api/v2/banner/25019354 HTTP/1.1" 200 19415 "-" '
+        '"Slotovod" "-" "1498697422-2118016444-4708-9752769" "712e90144abee9" 0.199\n',
+    ]
+    _EXPECTED_REPORT_TABLE_CONTENT = [
+        {
+            'count': 5579,
+            'count_perc': 0.21345333754705043,
+            'time_sum': 1480.1929999999986,
+            'time_perc': 0.07679145684672731,
+            'time_max': 119.954,
+            'time_avg': 0.2653151102348091,
+            'time_med': 0.188,
+            'url': '/api/v2/banner/25019354 HTTP/1.1'
+        },
+        {
+            'count': 5579,
+            'count_perc': 0.21345333754705043,
+            'time_sum': 1480.1929999999986,
+            'time_perc': 0.07679145684672731,
+            'time_max': 119.954,
+            'time_avg': 0.2653151102348091,
+            'time_med': 0.188,
+            'url': '/api/v2/banner/25019354 HTTP/1.1'
+        },
     ]
 
     _TESTS_RUNNING_DIR = TEST_CONFIG['TESTS_RUNNING_DIR']
@@ -50,11 +80,16 @@ class TestApp(unittest.TestCase):
         report_path = '{dir}/{report_name}'.format(
             dir=self.test_environment.get_report_dir(),
             report_name=self._TEST_REPORT_NAME)
+        # if a report exists
+        if not os.path.exists(report_path):
+            self.fail('A report file was not created')
         report_content = read_file(report_path)
-        self.assertListEqual(
-            self._LOG_CONTENT,
-            report_content
-        )
+
+        # check a presence of url values, seems it is enough for now
+
+        for row in self._EXPECTED_REPORT_TABLE_CONTENT:
+            if not any(row['url'] in line for line in report_content):
+                self.fail('Could not find correct url values in the report')
 
 
 #@unittest.skip("just for developing")
