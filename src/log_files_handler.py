@@ -17,13 +17,20 @@ class LogFilesHandler:
             if isfile(full_path):
                 yield full_path
 
+    def _parse_date_from_string(self, date_string, format, file_path=None):
+        try:
+            return datetime.strptime(date_string, format)
+        except ValueError:
+            msg_tail = ' for file {}'.format(file_path) if file_path else ''
+            msg = 'Wrong datetime format {}{}. Expected {}'.format(date_string, msg_tail, format)
+            print(msg)
+
     def is_report_exist_for_log(self, log_file_info, files_paths):
         report_name_re = '^{dir}/report-(20\d{{2}}\.\d{{2}}\.\d{{2}})\.html$'.format(dir=self._report_dir)
         for file_path in files_paths:
             matching_patterns = re.findall(report_name_re, file_path)
             date_string = matching_patterns[0]
-            # TODO: Exception handler here
-            report_date = datetime.strptime(date_string, '%Y.%m.%d')
+            report_date = self._parse_date_from_string(date_string, '%Y.%m.%d', file_path)
             if log_file_info.date == report_date:
                 return True
 
@@ -36,8 +43,7 @@ class LogFilesHandler:
         for file_path in files_paths:
             matching_patterns = re.findall(log_name_re, file_path)
             date_string = matching_patterns[0]
-            # TODO: Exception handler here
-            date = datetime.strptime(date_string, self._LOG_DATETIME_NAME_FORMAT)
+            date = self._parse_date_from_string(date_string, self._LOG_DATETIME_NAME_FORMAT, file_path)
             log_file = LogFile(
                 date=date,
                 path=file_path

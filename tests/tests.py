@@ -5,57 +5,60 @@ from utils import TestEnvironment, read_file
 
 import app
 from src.log_files_handler import LogFilesHandler
+from src.log_parser import LogParser
 
 TEST_CONFIG = {
     'TESTS_RUNNING_DIR': 'sandbox',
     'CONFIG_NAME': 'config.py'
 }
+_LOG_CONTENT = [
+    '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] '
+    '"GET /api/v2/banner/25019354 HTTP/1.1" 200 927 "-" '
+    '"Lynx/2.8.8dev.9 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/2.10.5" "-" '
+    '"1498697422-2190034393-4708-9752759" "dc7161be3" 0.390\n',
+    '1.99.174.176 3b81f63526fa8  - [29/Jun/2017:03:50:22 +0300] '
+    '"GET /api/1/photogenic_banners/list/?server_name=WIN7RB4 HTTP/1.1" 200 12 "-" '
+    '"Python-urllib/2.7" "-" "1498697422-32900793-4708-9752770" "-" 0.133\n',
+    '1.169.137.128 -  - [29/Jun/2017:03:50:22 +0300] '
+    '"GET /api/v2/banner/25019354 HTTP/1.1" 200 19415 "-" '
+    '"Slotovod" "-" "1498697422-2118016444-4708-9752769" "712e90144abee9" 0.199\n',
+]
+_EXPECTED_REPORT_TABLE_CONTENT = [
+    {
+        'count': 5579,
+        'count_perc': 0.21345333754705043,
+        'time_sum': 1480.1929999999986,
+        'time_perc': 0.07679145684672731,
+        'time_max': 119.954,
+        'time_avg': 0.2653151102348091,
+        'time_med': 0.188,
+        'url': '/api/v2/banner/25019354 HTTP/1.1'
+    },
+    {
+        'count': 5579,
+        'count_perc': 0.21345333754705043,
+        'time_sum': 1480.1929999999986,
+        'time_perc': 0.07679145684672731,
+        'time_max': 119.954,
+        'time_avg': 0.2653151102348091,
+        'time_med': 0.188,
+        'url': '/api/v2/banner/25019354 HTTP/1.1'
+    },
+]
 
 
 #@unittest.skip("just for developing")
 class TestApp(unittest.TestCase):
     """
-    An integration test
+    A common integration(functional) test
     """
     _TEST_LOG_NAME = 'nginx-access-ui.log-20170630'
     _TEST_REPORT_NAME = 'report-2017.06.30.html'
-    _LOG_CONTENT = [
-        '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] '
-        '"GET /api/v2/banner/25019354 HTTP/1.1" 200 927 "-" '
-        '"Lynx/2.8.8dev.9 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/2.10.5" "-" '
-        '"1498697422-2190034393-4708-9752759" "dc7161be3" 0.390\n',
-        '1.99.174.176 3b81f63526fa8  - [29/Jun/2017:03:50:22 +0300] '
-        '"GET /api/1/photogenic_banners/list/?server_name=WIN7RB4 HTTP/1.1" 200 12 "-" '
-        '"Python-urllib/2.7" "-" "1498697422-32900793-4708-9752770" "-" 0.133\n',
-        '1.169.137.128 -  - [29/Jun/2017:03:50:22 +0300] '
-        '"GET /api/v2/banner/25019354 HTTP/1.1" 200 19415 "-" '
-        '"Slotovod" "-" "1498697422-2118016444-4708-9752769" "712e90144abee9" 0.199\n',
-    ]
-    _EXPECTED_REPORT_TABLE_CONTENT = [
-        {
-            'count': 5579,
-            'count_perc': 0.21345333754705043,
-            'time_sum': 1480.1929999999986,
-            'time_perc': 0.07679145684672731,
-            'time_max': 119.954,
-            'time_avg': 0.2653151102348091,
-            'time_med': 0.188,
-            'url': '/api/v2/banner/25019354 HTTP/1.1'
-        },
-        {
-            'count': 5579,
-            'count_perc': 0.21345333754705043,
-            'time_sum': 1480.1929999999986,
-            'time_perc': 0.07679145684672731,
-            'time_max': 119.954,
-            'time_avg': 0.2653151102348091,
-            'time_med': 0.188,
-            'url': '/api/v2/banner/25019354 HTTP/1.1'
-        },
-    ]
 
     _TESTS_RUNNING_DIR = TEST_CONFIG['TESTS_RUNNING_DIR']
     _CONFIG_NAME = TEST_CONFIG['CONFIG_NAME']
+    _LOG_CONTENT = _LOG_CONTENT
+    _EXPECTED_REPORT_TABLE_CONTENT = _EXPECTED_REPORT_TABLE_CONTENT
 
     @classmethod
     def setUpClass(cls):
@@ -86,16 +89,32 @@ class TestApp(unittest.TestCase):
         report_content = read_file(report_path)
 
         # check a presence of url values, seems it is enough for now
-
         for row in self._EXPECTED_REPORT_TABLE_CONTENT:
             if not any(row['url'] in line for line in report_content):
                 self.fail('Could not find correct url values in the report')
+
+@unittest.skip("just for developing")
+class TestLogParser(unittest.TestCase):
+    """
+    Unit tests for LogParser class
+    """
+    _LOG_CONTENT = _LOG_CONTENT
+    _EXPECTED_REPORT_TABLE_CONTENT = _EXPECTED_REPORT_TABLE_CONTENT
+
+    def test_it_returns_correct_report_table_data(self):
+        log_parser = LogParser(log_file_content=self._LOG_CONTENT)
+        report_table_content = log_parser.get_parsed_data()
+
+        self.assertListEqual(
+            list(report_table_content),
+            self._EXPECTED_REPORT_TABLE_CONTENT
+        )
 
 
 #@unittest.skip("just for developing")
 class TestLogfile(unittest.TestCase):
     """
-    Unit tests for Logfile class
+    Integration tests for Logfile class
     """
     _TEST_LOGS_NAMES = {
         '2017.06.30': 'nginx-access-ui.log-20170630',
