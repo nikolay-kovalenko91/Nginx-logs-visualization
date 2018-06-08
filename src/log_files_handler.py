@@ -38,17 +38,22 @@ class LogFilesHandler:
 
         return False
 
+    def _get_log_file_info(self):
+        pass
+
     def _get_last_log_path_to_parse(self, dir_name, files_paths):
-        # TODO: add extension?
-        log_name_re = '^{dir}/nginx-access-ui\.log-(20\d{{6}})\.{{0,1}}.{{0,2}}$'.format(dir=dir_name)
+        log_name_re = '^{dir}/nginx-access-ui\.log-(20\d{{6}})\.{{0,1}}(.{{0,2}})$'.format(dir=dir_name)
         log_files = []
         for file_path in files_paths:
-            matching_patterns = re.findall(log_name_re, file_path)
-            date_string = matching_patterns[0]
+            matching_patterns = re.findall(log_name_re, file_path)[0]
+            date_string, file_extension = matching_patterns[0], matching_patterns[1]
+            # TODO: check if date and extension are ok, and then add only in that case
+            # self._get_log_file_info()
             date = self._parse_date_from_string(date_string, self._LOG_DATETIME_NAME_FORMAT, file_path)
             log_file = LogFile(
                 date=date,
-                path=file_path
+                path=file_path,
+                file_extension=file_extension
             )
             log_files.append(log_file)
 
@@ -68,6 +73,7 @@ class LogFilesHandler:
 
     def _read_file(self, path):
         # TODO: write a decorator for try/exc
+        # TODO: compressed files reading
         try:
             with open(path) as file_handler:
                 for line in self._read_lines(file_handler):
@@ -90,10 +96,11 @@ class LogFilesHandler:
 
 
 class LogFile:
-    def __init__(self, date, path, content=None):
+    def __init__(self, date, path, file_extension, content=None):
         self.date = date
         self.path = path
         self.content = content
+        self.file_extension = file_extension
 
     def __repr__(self):
         return self.date.strftime('%m/%d/%Y')

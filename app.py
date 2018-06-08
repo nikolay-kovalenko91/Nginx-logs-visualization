@@ -22,10 +22,12 @@ def _get_config(path):
         with open(path) as config_file:
             return json.load(config_file)
     except (IOError, OSError):
+        # TODO: Integrate logging library
         print("An error opening / processing config file occurred")
 
 
 def main():
+    # TODO: Check a task for appropriate config behaviour
     config_path = os.environ.get('config')
     config = default_config
     if config_path:

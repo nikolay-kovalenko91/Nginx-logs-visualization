@@ -3,4 +3,5 @@ class LogParser:
         self._log_file_content = log_file_content
 
     def get_parsed_data(self):
+        # TODO: Implement the logic
         yield from self._log_file_content
