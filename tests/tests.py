@@ -6,6 +6,7 @@ from utils import TestEnvironment, read_file
 import app
 from src.log_files_handler import LogFilesHandler
 from src.log_parser import LogParser
+from src.exceptions import ReportExists, NoLogFilesFound
 
 TEST_CONFIG = {
     'TESTS_RUNNING_DIR': 'sandbox',
@@ -171,7 +172,7 @@ class TestLogfile(unittest.TestCase):
         report_dir = self.test_environment.get_report_dir()
         log_files_handler = LogFilesHandler(log_dir=log_dir, report_dir=report_dir)
 
-        with self.assertRaises(StopIteration):
+        with self.assertRaises(NoLogFilesFound):
             log_files_handler.get_file_to_parse()
 
     def test_it_raises_exception_if_logs_have_analyzed_and_report_exists(self):
@@ -191,7 +192,7 @@ class TestLogfile(unittest.TestCase):
         report_dir = self.test_environment.get_report_dir()
         log_files_handler = LogFilesHandler(log_dir=log_dir, report_dir=report_dir)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ReportExists):
             log_files_handler.get_file_to_parse()
 
 

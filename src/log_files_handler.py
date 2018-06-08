@@ -3,6 +3,8 @@ from os.path import isfile, join
 import re
 from datetime import datetime
 
+from src.exceptions import ReportExists, NoLogFilesFound
+
 
 class LogFilesHandler:
     _LOG_DATETIME_NAME_FORMAT = '%Y%m%d'
@@ -53,8 +55,7 @@ class LogFilesHandler:
         log_files.sort(key=lambda log_f: log_f.date)
 
         if len(log_files) == 0:
-            # TODO: Create new exception
-            raise StopIteration
+            raise NoLogFilesFound
 
         return log_files.pop()
 
@@ -80,8 +81,7 @@ class LogFilesHandler:
 
         report_files_paths = self._get_files_paths_of_dir(dir_name=self._report_dir)
         if self.is_report_exist_for_log(log_file_info=last_log_file, files_paths=report_files_paths):
-            # TODO: Create new exception
-            raise ValueError
+            raise ReportExists
 
         log_content = self._read_file(path=last_log_file.path)
         last_log_file.content = log_content
