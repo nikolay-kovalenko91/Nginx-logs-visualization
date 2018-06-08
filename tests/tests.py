@@ -26,23 +26,23 @@ _LOG_CONTENT = [
 ]
 _EXPECTED_REPORT_TABLE_CONTENT = [
     {
-        'count': 5579,
-        'count_perc': 0.21345333754705043,
-        'time_sum': 1480.1929999999986,
-        'time_perc': 0.07679145684672731,
-        'time_max': 119.954,
-        'time_avg': 0.2653151102348091,
-        'time_med': 0.188,
+        'count': 2,
+        'count_perc': 0.666,
+        'time_sum': 0.390 + 0.199,
+        'time_perc': 0.390 + 0.199 / 0.390 + 0.199 + 0.133,
+        'time_max': 0.390,
+        'time_avg': 0.390 + 0.199 / 2,
+        'time_med': 0.390 + 0.199 / 2,
         'url': '/api/v2/banner/25019354 HTTP/1.1'
     },
     {
-        'count': 5579,
-        'count_perc': 0.21345333754705043,
-        'time_sum': 1480.1929999999986,
-        'time_perc': 0.07679145684672731,
-        'time_max': 119.954,
-        'time_avg': 0.2653151102348091,
-        'time_med': 0.188,
+        'count': 1,
+        'count_perc': 0.333,
+        'time_sum': 0.133,
+        'time_perc': 0.133 / 0.390 + 0.199 + 0.133,
+        'time_max': 0.133,
+        'time_avg': 0.133,
+        'time_med': 0.133 / 2,
         'url': '/api/v2/banner/25019354 HTTP/1.1'
     },
 ]
@@ -94,7 +94,7 @@ class TestApp(unittest.TestCase):
             if not any(row['url'] in line for line in report_content):
                 self.fail('Could not find correct url values in the report')
 
-@unittest.skip("just for developing")
+#@unittest.skip("just for developing")
 class TestLogParser(unittest.TestCase):
     """
     Unit tests for LogParser class
@@ -106,10 +106,19 @@ class TestLogParser(unittest.TestCase):
         log_parser = LogParser(log_file_content=self._LOG_CONTENT)
         report_table_content = log_parser.get_parsed_data()
 
-        self.assertListEqual(
-            list(report_table_content),
-            self._EXPECTED_REPORT_TABLE_CONTENT
-        )
+        for passed_report_line, expected_report_line in zip(list(report_table_content),
+                                                            self._EXPECTED_REPORT_TABLE_CONTENT):
+            for metric_name, expected_value in expected_report_line.items():
+                passed_value = passed_report_line[metric_name]
+                if isinstance(passed_value, float):
+                    self.assertAlmostEqual(passed_value, expected_value, delta=0.01)
+                else:
+                    self.assertEqual(passed_value, expected_value)
+
+        # self.assertListEqual(
+        #     list(report_table_content),
+        #     self._EXPECTED_REPORT_TABLE_CONTENT
+        # )
 
 
 #@unittest.skip("just for developing")
