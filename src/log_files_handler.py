@@ -30,8 +30,8 @@ class LogFilesHandler:
     def is_report_exist_for_log(self, log_file_info, files_paths):
         report_name_re = '^{dir}/report-(20\d{{2}}\.\d{{2}}\.\d{{2}})\.html$'.format(dir=self._report_dir)
         for file_path in files_paths:
-            matching_patterns = re.findall(report_name_re, file_path)
-            date_string = matching_patterns[0]
+            matching_values = re.findall(report_name_re, file_path)
+            date_string = matching_values[0]
             report_date = self._parse_date_from_string(date_string, '%Y.%m.%d', file_path)
             if log_file_info.date == report_date:
                 return True
@@ -45,8 +45,8 @@ class LogFilesHandler:
         log_name_re = '^{dir}/nginx-access-ui\.log-(20\d{{6}})\.{{0,1}}(.{{0,2}})$'.format(dir=dir_name)
         log_files = []
         for file_path in files_paths:
-            matching_patterns = re.findall(log_name_re, file_path)[0]
-            date_string, file_extension = matching_patterns[0], matching_patterns[1]
+            matching_lines = re.findall(log_name_re, file_path)[0]
+            date_string, file_extension = matching_lines[0], matching_lines[1]
             # TODO: check if date and extension are ok, and then add only in that case
             # self._get_log_file_info()
             date = self._parse_date_from_string(date_string, self._LOG_DATETIME_NAME_FORMAT, file_path)

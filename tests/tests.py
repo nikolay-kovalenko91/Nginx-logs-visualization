@@ -103,7 +103,7 @@ class TestLogParser(unittest.TestCase):
     _EXPECTED_REPORT_TABLE_CONTENT = _EXPECTED_REPORT_TABLE_CONTENT
 
     def test_it_returns_correct_report_table_data(self):
-        log_parser = LogParser(log_file_content=self._LOG_CONTENT)
+        log_parser = LogParser(log_file_content=self._LOG_CONTENT, report_size=1000)
         report_table_content = log_parser.get_parsed_data()
 
         for passed_report_line, expected_report_line in zip(list(report_table_content),
