@@ -27,23 +27,23 @@ _LOG_CONTENT = [
 _EXPECTED_REPORT_TABLE_CONTENT = [
     {
         'count': 2,
-        'count_perc': 0.666,
+        'count_perc': 0.666 * 100,
         'time_sum': 0.390 + 0.199,
-        'time_perc': 0.390 + 0.199 / 0.390 + 0.199 + 0.133,
+        'time_perc': (0.390 + 0.199 / 0.390 + 0.199 + 0.133) * 100,
         'time_max': 0.390,
-        'time_avg': 0.390 + 0.199 / 2,
-        'time_med': 0.390 + 0.199 / 2,
-        'url': '/api/v2/banner/25019354 HTTP/1.1'
+        'time_avg': (0.390 + 0.199) / 2,
+        'time_med': (0.390 + 0.199) / 2,
+        'url': '/api/v2/banner/25019354'
     },
     {
         'count': 1,
-        'count_perc': 0.333,
+        'count_perc': 0.333 * 100,
         'time_sum': 0.133,
-        'time_perc': 0.133 / 0.390 + 0.199 + 0.133,
+        'time_perc': (0.133 / 0.390 + 0.199 + 0.133) * 100,
         'time_max': 0.133,
         'time_avg': 0.133,
         'time_med': 0.133 / 2,
-        'url': '/api/v2/banner/25019354 HTTP/1.1'
+        'url': '/api/v2/banner/25019354'
     },
 ]
 
@@ -106,19 +106,14 @@ class TestLogParser(unittest.TestCase):
         log_parser = LogParser(log_file_content=self._LOG_CONTENT, report_size=1000)
         report_table_content = log_parser.get_parsed_data()
 
-        for passed_report_line, expected_report_line in zip(list(report_table_content),
+        for passed_report_line, expected_report_line in zip(report_table_content,
                                                             self._EXPECTED_REPORT_TABLE_CONTENT):
             for metric_name, expected_value in expected_report_line.items():
                 passed_value = passed_report_line[metric_name]
                 if isinstance(passed_value, float):
-                    self.assertAlmostEqual(passed_value, expected_value, delta=0.01)
+                    self.assertAlmostEqual(passed_value, expected_value, delta=0.1, msg='for metric name {}'.format(metric_name))
                 else:
                     self.assertEqual(passed_value, expected_value)
-
-        # self.assertListEqual(
-        #     list(report_table_content),
-        #     self._EXPECTED_REPORT_TABLE_CONTENT
-        # )
 
 
 #@unittest.skip("just for developing")
