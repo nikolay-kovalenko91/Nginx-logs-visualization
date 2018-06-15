@@ -17,12 +17,13 @@ def _get_config(path):
         with open(path) as config_file:
             return json.load(config_file)
     except (IOError, OSError):
-        # TODO: Integrate logging library
+        # TODO: Integrate logging library + Check a task for appropriate logging behaviour
+        # https://docs.python.org/3/howto/logging.html
         print("An error opening / processing config file occurred")
 
 
 def main():
-    # TODO: Check a task for appropriate config behaviour
+    # TODO: Check a task for appropriate config behaviour // https://docs.python.org/3/library/configparser.html
     config_path = os.environ.get('config')
     config = default_config
     if config_path:
