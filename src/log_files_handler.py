@@ -1,7 +1,9 @@
 from os import listdir
 from os.path import isfile, join
 import re
+import gzip
 from datetime import datetime
+import sys
 
 from src.exceptions import ReportExists, NoLogFilesFound
 
@@ -71,13 +73,29 @@ class LogFilesHandler:
                 break
             yield line
 
-    def _read_file(self, path):
+    def _read_plain_file(self, path):
+        with open(path) as file_handler:
+            for line in self._read_lines(file_handler):
+                yield line
+
+    def _read_gzip_file(self, path):
+        with gzip.open(path, 'rb') as file_handler:
+            for line in self._read_lines(file_handler):
+                yield line
+
+    def _read_file(self, path, extension):
         # TODO: write a decorator for try/exc
-        # TODO: compressed files reading
+        extension_vs_handlers = {
+            '': self._read_plain_file,
+            'gz': self._read_gzip_file
+        }
+        if extension not in extension_vs_handlers:
+            sys.exit('Unknown extension of found log file {}'.format(path))
+
+        handler = extension_vs_handlers[extension]
+        # TODO: remove as a decorator will be added
         try:
-            with open(path) as file_handler:
-                for line in self._read_lines(file_handler):
-                    yield line
+            yield from handler(path)
         except (IOError, OSError):
             print("An error opening / processing log file occurred")
 
@@ -89,7 +107,7 @@ class LogFilesHandler:
         if self.is_report_exist_for_log(log_file_info=last_log_file, files_paths=report_files_paths):
             raise ReportExists
 
-        log_content = self._read_file(path=last_log_file.path)
+        log_content = self._read_file(path=last_log_file.path, extension=last_log_file.file_extension)
         last_log_file.content = log_content
 
         return last_log_file
