@@ -40,17 +40,12 @@ class LogFilesHandler:
 
         return False
 
-    def _get_log_file_info(self):
-        pass
-
     def _get_last_log_path_to_parse(self, dir_name, files_paths):
         log_name_re = '^{dir}/nginx-access-ui\.log-(20\d{{6}})\.{{0,1}}(.{{0,2}})$'.format(dir=dir_name)
         log_files = []
         for file_path in files_paths:
             matching_lines = re.findall(log_name_re, file_path)[0]
             date_string, file_extension = matching_lines[0], matching_lines[1]
-            # TODO: check if date and extension are ok, and then add only in that case
-            # self._get_log_file_info()
             date = self._parse_date_from_string(date_string, self._LOG_DATETIME_NAME_FORMAT, file_path)
             log_file = LogFile(
                 date=date,
@@ -113,6 +108,7 @@ class LogFilesHandler:
         return last_log_file
 
 
+# TODO: Named tuple?
 class LogFile:
     def __init__(self, date, path, file_extension, content=None):
         self.date = date
