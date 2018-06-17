@@ -2,7 +2,7 @@ import logging
 
 from src.log_files_handler import LogFilesHandler
 from src.report_composer import ReportComposer
-from src.log_parser import LogParser
+from src.parser.log_parser import LogParser
 
 
 class LogAnalyzer:

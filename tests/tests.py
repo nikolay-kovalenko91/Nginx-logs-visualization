@@ -5,7 +5,7 @@ from utils import TestEnvironment, read_file
 
 import app
 from src.log_files_handler import LogFilesHandler
-from src.log_parser import LogParser
+from src.parser.log_parser import LogParser
 from src.exceptions import ReportExists, NoLogFilesFound
 
 TEST_CONFIG = {
@@ -32,7 +32,7 @@ _EXPECTED_REPORT_TABLE_CONTENT = [
         'time_perc': ((0.390 + 0.199) / (0.390 + 0.199 + 0.133)) * 100,
         'time_max': 0.390,
         'time_avg': (0.390 + 0.199) / 2,
-        'time_med': (0.390 + 0.199) / 2,
+        'time_med': 0.390,
         'url': '/api/v2/banner/25019354'
     },
     {
@@ -42,7 +42,7 @@ _EXPECTED_REPORT_TABLE_CONTENT = [
         'time_perc': (0.133 / (0.390 + 0.199 + 0.133)) * 100,
         'time_max': 0.133,
         'time_avg': 0.133,
-        'time_med': 0.133 / 2,
+        'time_med': 0.133,
         'url': '/api/1/photogenic_banners/list/?server_name=WIN7RB4'
     },
 ]
