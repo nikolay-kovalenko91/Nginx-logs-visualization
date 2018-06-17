@@ -1,4 +1,5 @@
 import re
+import logging
 
 # log_format ui_short '$remote_addr $remote_user $http_x_real_ip [$time_local] "$request" '
 #                     '$status $body_bytes_sent "$http_referer" '
@@ -32,9 +33,10 @@ class LogParser:
 
     def _parse_lines(self, lines):
         for line in lines:
-            matched_obj = re.match(self._RE_PATTERN, line)
+            decoded_line = line.decode('utf-8') if isinstance(line, bytes) else line
+            matched_obj = re.match(self._RE_PATTERN, decoded_line)
             if not matched_obj:
-                print('Can not recognize line {} in the log'.format(line))
+                logging.error('Can not recognize line {} in the log'.format(line))
                 continue
             matching_values = matched_obj.groupdict()
             yield matching_values
@@ -87,12 +89,11 @@ class LogParser:
             total_requests_count=total_requests_count
         )
 
-        sorted_statistic = sorted(full_log_statistic.values(), key=lambda value: value['time_sum'])
-        cutted_statistic = sorted_statistic[self._report_size:]
+        sorted_statistic = sorted(full_log_statistic.values(), key=lambda value: value['time_sum'], reverse=True)
+        cutted_statistic = sorted_statistic[:self._report_size]
         return cutted_statistic
 
     def get_parsed_data(self):
-        self._log_file_content = list(self._log_file_content)
         matching_values_list = self._parse_lines(lines=self._log_file_content)
         log_statistic = self._get_statistic(matching_values_list)
 

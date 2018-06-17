@@ -4,6 +4,7 @@ import re
 import gzip
 from datetime import datetime
 import sys
+import logging
 
 from src.exceptions import ReportExists, NoLogFilesFound
 
@@ -27,7 +28,7 @@ class LogFilesHandler:
         except ValueError:
             msg_tail = ' for file {}'.format(file_path) if file_path else ''
             msg = 'Wrong datetime format {}{}. Expected {}'.format(date_string, msg_tail, format)
-            print(msg)
+            logging.error(msg)
 
     def is_report_exist_for_log(self, log_file_info, files_paths):
         report_name_re = '^{dir}/report-(20\d{{2}}\.\d{{2}}\.\d{{2}})\.html$'.format(dir=self._report_dir)
@@ -92,7 +93,7 @@ class LogFilesHandler:
         try:
             yield from handler(path)
         except (IOError, OSError):
-            print("An error opening / processing log file occurred")
+            logging.exception("An error opening / processing log file occurred")
 
     def get_file_to_parse(self):
         log_files_paths = self._get_files_paths_of_dir(dir_name=self._log_dir)

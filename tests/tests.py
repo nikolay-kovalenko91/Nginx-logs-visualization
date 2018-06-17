@@ -10,7 +10,7 @@ from src.exceptions import ReportExists, NoLogFilesFound
 
 TEST_CONFIG = {
     'TESTS_RUNNING_DIR': 'sandbox',
-    'CONFIG_NAME': 'config.py'
+    'CONFIG_NAME': 'config.json'
 }
 _LOG_CONTENT = [
     '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] '
@@ -29,7 +29,7 @@ _EXPECTED_REPORT_TABLE_CONTENT = [
         'count': 2,
         'count_perc': 0.666 * 100,
         'time_sum': 0.390 + 0.199,
-        'time_perc': (0.390 + 0.199 / 0.390 + 0.199 + 0.133) * 100,
+        'time_perc': ((0.390 + 0.199) / (0.390 + 0.199 + 0.133)) * 100,
         'time_max': 0.390,
         'time_avg': (0.390 + 0.199) / 2,
         'time_med': (0.390 + 0.199) / 2,
@@ -39,11 +39,11 @@ _EXPECTED_REPORT_TABLE_CONTENT = [
         'count': 1,
         'count_perc': 0.333 * 100,
         'time_sum': 0.133,
-        'time_perc': (0.133 / 0.390 + 0.199 + 0.133) * 100,
+        'time_perc': (0.133 / (0.390 + 0.199 + 0.133)) * 100,
         'time_max': 0.133,
         'time_avg': 0.133,
         'time_med': 0.133 / 2,
-        'url': '/api/v2/banner/25019354'
+        'url': '/api/1/photogenic_banners/list/?server_name=WIN7RB4'
     },
 ]
 
@@ -111,7 +111,10 @@ class TestLogParser(unittest.TestCase):
             for metric_name, expected_value in expected_report_line.items():
                 passed_value = passed_report_line[metric_name]
                 if isinstance(passed_value, float):
-                    self.assertAlmostEqual(passed_value, expected_value, delta=0.1, msg='for metric name {}'.format(metric_name))
+                    self.assertAlmostEqual(passed_value,
+                                           expected_value,
+                                           delta=0.1,
+                                           msg='for metric name {}'.format(metric_name))
                 else:
                     self.assertEqual(passed_value, expected_value)
 

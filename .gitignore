@@ -24,6 +24,7 @@ __pycache__
 .history
 geckodriver.log
 
-#Local files
-report.html
+# Local files and logging
 /sandbox
+log.txt
+config.json
