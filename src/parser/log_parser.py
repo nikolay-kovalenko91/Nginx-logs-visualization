@@ -12,23 +12,23 @@ from src.parser.median_calc import median
 
 
 class LogParser:
-    _ALLOWED_PARSE_FAILURES_PERCENT = 30
+    _ALLOWED_PARSE_FAILURES_PERCENT = 60
     _RE_PATTERN = '^(?P<remote_addr>[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}) ' \
-                 '(?P<remote_user>[^ ]{1,})  ' \
-                 '(?P<http_x_real_ip>[^ ]{1,}|\-) ' \
-                 '\[(?P<time_local>[0-9]{2}\/[A-Za-z]{3}\/[0-9]{1,4}:[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} ' \
+                  '(?P<remote_user>[^ ]{1,})  ' \
+                  '(?P<http_x_real_ip>[^ ]{1,}|\-) ' \
+                  '\[(?P<time_local>[0-9]{2}\/[A-Za-z]{3}\/[0-9]{1,4}:[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} ' \
                   '[+\-][0-9]{4})\] ' \
-                 '"(?P<request>[A-Z ]+) ' \
-                 '(?P<url>[^"]*) ' \
-                 '(?P<protocol>[^"]*)" ' \
-                 '(?P<status>[0-9]{3}) ' \
-                 '(?P<body_bytes_sent>[0-9]{1,}|\-) ' \
-                 '"(?P<http_referer>[^"]*|\-)" ' \
-                 '"(?P<http_user_agent>[^"]+)" ' \
-                 '"(?P<http_x_forwarded_for>[^"]*|\-)" ' \
-                 '"(?P<http_X_REQUEST_ID>[^"]*|\-)" ' \
-                 '(?P<http_X_RB_USER>[^ ]{1,}) ' \
-                 '(?P<request_time>[\d\.]+)$'
+                  '"(?P<request>[A-Z ]+) ' \
+                  '(?P<url>[^"]*) ' \
+                  '(?P<protocol>[^"]*)" ' \
+                  '(?P<status>[0-9]{3}) ' \
+                  '(?P<body_bytes_sent>[0-9]{1,}|\-) ' \
+                  '"(?P<http_referer>[^"]*|\-)" ' \
+                  '"(?P<http_user_agent>[^"]+)" ' \
+                  '"(?P<http_x_forwarded_for>[^"]*|\-)" ' \
+                  '"(?P<http_X_REQUEST_ID>[^"]*|\-)" ' \
+                  '(?P<http_X_RB_USER>[^ ]{1,}) ' \
+                  '(?P<request_time>[\d\.]+)$'
 
     def __init__(self, log_file_content: List[str], report_size: int):
         self._log_file_content = log_file_content

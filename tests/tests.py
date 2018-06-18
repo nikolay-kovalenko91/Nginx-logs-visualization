@@ -55,7 +55,6 @@ _EXPECTED_REPORT_TABLE_CONTENT = [
 ]
 
 
-#@unittest.skip("just for developing")
 class TestApp(unittest.TestCase):
     """
     A common integration(functional) test
@@ -101,7 +100,7 @@ class TestApp(unittest.TestCase):
             if not any(row['url'] in line for line in report_content):
                 self.fail('Could not find correct url values in the report')
 
-#@unittest.skip("just for developing")
+
 class TestLogParser(unittest.TestCase):
     """
     Unit tests for LogParser class
@@ -156,7 +155,6 @@ class TestLogParser(unittest.TestCase):
             self.fail('20% errors percent is OK, but an exception was raised')
 
 
-#@unittest.skip("just for developing")
 class TestLogfile(unittest.TestCase):
     """
     Integration tests for Logfile class
