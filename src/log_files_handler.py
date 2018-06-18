@@ -1,12 +1,31 @@
-from os import listdir
-from os.path import isfile, join
 import re
 import gzip
-from datetime import datetime
 import sys
 import logging
 
+from os.path import isfile, join
+from os import listdir
+from datetime import datetime
+from typing import List, Generator, TextIO
+
 from src.exceptions import ReportExists, NoLogFilesFound
+from src.utils import catch_file_io_exceptions
+
+
+# Namedtuple is immutable, so I can't set up 'content' param.
+# The best idea is to use 'pip install recordtype' later
+class LogFile:
+    def __init__(self, date: datetime, path: str, file_extension: str, content: List[str]=None):
+        self.date = date
+        self.path = path
+        self.content = content
+        self.file_extension = file_extension
+
+    def set_content(self, content):
+        self.content = content
+
+    def __repr__(self):
+        return self.date.strftime('%m/%d/%Y')
 
 
 class LogFilesHandler:
@@ -16,21 +35,21 @@ class LogFilesHandler:
         self._log_dir = log_dir
         self._report_dir = report_dir
 
-    def _get_files_paths_of_dir(self, dir_name):
+    def _get_files_paths_of_dir(self, dir_name: str) -> Generator[str, None, None]:
         for relative_path in listdir(dir_name):
             full_path = join(dir_name, relative_path)
             if isfile(full_path):
                 yield full_path
 
-    def _parse_date_from_string(self, date_string, format, file_path=None):
+    def _parse_date_from_string(self, date_string: str, format_string: str, file_path=None) -> datetime:
         try:
-            return datetime.strptime(date_string, format)
+            return datetime.strptime(date_string, format_string)
         except ValueError:
             msg_tail = ' for file {}'.format(file_path) if file_path else ''
-            msg = 'Wrong datetime format {}{}. Expected {}'.format(date_string, msg_tail, format)
+            msg = 'Wrong datetime format {}{}. Expected {}'.format(date_string, msg_tail, format_string)
             logging.error(msg)
 
-    def is_report_exist_for_log(self, log_file_info, files_paths):
+    def _is_report_exist_for_log(self, log_file_info: LogFile, files_paths: List[str]) -> bool:
         report_name_re = '^{dir}/report-(20\d{{2}}\.\d{{2}}\.\d{{2}})\.html$'.format(dir=self._report_dir)
         for file_path in files_paths:
             matching_values = re.findall(report_name_re, file_path)
@@ -41,7 +60,7 @@ class LogFilesHandler:
 
         return False
 
-    def _get_last_log_path_to_parse(self, dir_name, files_paths):
+    def _get_last_log_path_to_parse(self, dir_name: str, files_paths: List[str]) -> LogFile:
         log_name_re = '^{dir}/nginx-access-ui\.log-(20\d{{6}})\.{{0,1}}(.{{0,2}})$'.format(dir=dir_name)
         log_files = []
         for file_path in files_paths:
@@ -62,60 +81,45 @@ class LogFilesHandler:
 
         return log_files.pop()
 
-    def _read_lines(self, file_object):
+    def _read_lines(self, file_object: TextIO) -> Generator[str, None, None]:
         while True:
             line = file_object.readline()
             if not line:
                 break
             yield line
 
-    def _read_plain_file(self, path):
+    @catch_file_io_exceptions()
+    def _read_plain_file(self, path: str) -> Generator[str, None, None]:
         with open(path) as file_handler:
-            for line in self._read_lines(file_handler):
-                yield line
+            yield from self._read_lines(file_handler)
 
-    def _read_gzip_file(self, path):
+    @catch_file_io_exceptions()
+    def _read_gzip_file(self, path: str) -> Generator[str, None, None]:
         with gzip.open(path, 'rb') as file_handler:
-            for line in self._read_lines(file_handler):
-                yield line
+            yield from self._read_lines(file_handler)
 
-    def _read_file(self, path, extension):
-        # TODO: write a decorator for try/exc
+    def _read_file(self, path: str, extension: str) -> Generator[str, None, None]:
         extension_vs_handlers = {
             '': self._read_plain_file,
             'gz': self._read_gzip_file
         }
         if extension not in extension_vs_handlers:
-            sys.exit('Unknown extension of found log file {}'.format(path))
+            logging.error('Unknown extension of found log file {}'.format(path))
+            sys.exit()
 
         handler = extension_vs_handlers[extension]
-        # TODO: remove as a decorator will be added
-        try:
-            yield from handler(path)
-        except (IOError, OSError):
-            logging.exception("An error opening / processing log file occurred")
 
-    def get_file_to_parse(self):
+        yield from handler(path=path)
+
+    def get_file_to_parse(self) -> LogFile:
         log_files_paths = self._get_files_paths_of_dir(dir_name=self._log_dir)
         last_log_file = self._get_last_log_path_to_parse(dir_name=self._log_dir, files_paths=log_files_paths)
 
         report_files_paths = self._get_files_paths_of_dir(dir_name=self._report_dir)
-        if self.is_report_exist_for_log(log_file_info=last_log_file, files_paths=report_files_paths):
+        if self._is_report_exist_for_log(log_file_info=last_log_file, files_paths=report_files_paths):
             raise ReportExists
 
         log_content = self._read_file(path=last_log_file.path, extension=last_log_file.file_extension)
-        last_log_file.content = log_content
+        last_log_file.set_content(log_content)
 
         return last_log_file
-
-
-# TODO: Named tuple?
-class LogFile:
-    def __init__(self, date, path, file_extension, content=None):
-        self.date = date
-        self.path = path
-        self.content = content
-        self.file_extension = file_extension
-
-    def __repr__(self):
-        return self.date.strftime('%m/%d/%Y')

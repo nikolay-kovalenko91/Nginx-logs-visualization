@@ -6,12 +6,12 @@ from src.parser.log_parser import LogParser
 
 
 class LogAnalyzer:
-    def __init__(self, config):
+    def __init__(self, config: dict):
         self._report_size = config['REPORT_SIZE']
         self._report_dir = config['REPORT_DIR']
         self._log_dir = config['LOG_DIR']
 
-    def main(self):
+    def main(self) -> None:
         log_files_handler = LogFilesHandler(log_dir=self._log_dir, report_dir=self._report_dir)
         log_file_obj = log_files_handler.get_file_to_parse()
         logging.info('Running a parsing for the found log file: {} ...'.format(log_file_obj.path))

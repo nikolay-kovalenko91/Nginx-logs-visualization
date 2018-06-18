@@ -15,7 +15,7 @@ default_config = {
 }
 
 
-def _get_config(path):
+def _get_config(path: str) -> dict:
     try:
         with open(path) as config_file:
             return json.load(config_file)
@@ -23,8 +23,7 @@ def _get_config(path):
         sys.exit("A config file not found")
 
 
-# Todo: apply a static typization for all the code?
-def main():
+def main() -> None:
     external_config_path = os.environ.get('config', default_config_path)
     external_config = _get_config(external_config_path)
     config = {**default_config, **external_config}

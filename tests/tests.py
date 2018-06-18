@@ -12,6 +12,10 @@ TEST_CONFIG = {
     'TESTS_RUNNING_DIR': 'sandbox',
     'CONFIG_NAME': 'config.json'
 }
+# log_format ui_short '$remote_addr $remote_user $http_x_real_ip [$time_local] "$request" '
+#                     '$status $body_bytes_sent "$http_referer" '
+#                     '"$http_user_agent" "$http_x_forwarded_for" "$http_X_REQUEST_ID" "$http_X_RB_USER"
+#                     '$request_time';
 _LOG_CONTENT = [
     '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] '
     '"GET /api/v2/banner/25019354 HTTP/1.1" 200 927 "-" '
@@ -23,23 +27,26 @@ _LOG_CONTENT = [
     '1.169.137.128 -  - [29/Jun/2017:03:50:22 +0300] '
     '"GET /api/v2/banner/25019354 HTTP/1.1" 200 19415 "-" '
     '"Slotovod" "-" "1498697422-2118016444-4708-9752769" "712e90144abee9" 0.199\n',
+    '1.169.137.1 -  - [29/Jun/2017:03:50:24 +0300] '
+    '"GET /api/v2/banner/25019354 HTTP/1.1" 200 19415 "-" '
+    '"Python-urllib/2.7" "-" "1498697420-2118016444-4708-9752771" "-" 0.110\n',
 ]
 _EXPECTED_REPORT_TABLE_CONTENT = [
     {
-        'count': 2,
-        'count_perc': 0.666 * 100,
-        'time_sum': 0.390 + 0.199,
-        'time_perc': ((0.390 + 0.199) / (0.390 + 0.199 + 0.133)) * 100,
+        'count': 3,
+        'count_perc': 3 / 4 * 100,
+        'time_sum': 0.390 + 0.199 + 0.11,
+        'time_perc': ((0.390 + 0.199 + 0.11) / (0.390 + 0.199 + 0.133 + 0.11)) * 100,
         'time_max': 0.390,
-        'time_avg': (0.390 + 0.199) / 2,
+        'time_avg': (0.390 + 0.199 + 0.11) / 3,
         'time_med': 0.390,
         'url': '/api/v2/banner/25019354'
     },
     {
         'count': 1,
-        'count_perc': 0.333 * 100,
+        'count_perc': 1 / 4 * 100,
         'time_sum': 0.133,
-        'time_perc': (0.133 / (0.390 + 0.199 + 0.133)) * 100,
+        'time_perc': (0.133 / (0.390 + 0.199 + 0.133 + 0.11)) * 100,
         'time_max': 0.133,
         'time_avg': 0.133,
         'time_med': 0.133,
@@ -102,6 +109,21 @@ class TestLogParser(unittest.TestCase):
     _LOG_CONTENT = _LOG_CONTENT
     _EXPECTED_REPORT_TABLE_CONTENT = _EXPECTED_REPORT_TABLE_CONTENT
 
+    # log_format ui_short '$remote_addr $remote_user $http_x_real_ip [$time_local] "$request" '
+    #                     '$status $request_time';
+    _LOG_CONTENT_FORMATTED_WRONG = [
+        '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] '
+        '"GET /api/v2/banner/25019354 HTTP/1.1" 200 0.390\n',
+        '1.99.174.176 3b81f63526fa8  - [29/Jun/2017:03:50:22 +0300] '
+        '"GET /api/1/photogenic_banners/list/?server_name=WIN7RB4 HTTP/1.1" 200 0.133\n',
+        '1.169.137.128 -  - [29/Jun/2017:03:50:22 +0300] '
+        '"GET /api/v2/banner/25019354 HTTP/1.1" 200 0.199\n',
+        '1.169.137.3 -  - [29/Jun/2017:03:50:23 +0300] '
+        '"GET /api/v2/banner/46576387 HTTP/1.1" 200 0.239\n',
+        '1.169.137.2 -  - [29/Jun/2017:03:50:23 +0300] '
+        '"GET /api/v2/banner/23985394 HTTP/1.1" 200 0.180\n',
+    ]
+
     def test_it_returns_correct_report_table_data(self):
         log_parser = LogParser(log_file_content=self._LOG_CONTENT, report_size=1000)
         report_table_content = log_parser.get_parsed_data()
@@ -117,6 +139,21 @@ class TestLogParser(unittest.TestCase):
                                            msg='for metric name {}'.format(metric_name))
                 else:
                     self.assertEqual(passed_value, expected_value)
+
+    def test_it_quits_if_log_format_is_wrong_100_percent(self):
+        log_parser = LogParser(log_file_content=self._LOG_CONTENT_FORMATTED_WRONG, report_size=1000)
+        with self.assertRaises(SystemExit):
+            log_parser.get_parsed_data()
+
+    def test_it_quits_if_log_format_is_wrong_20_percent(self):
+        wrong_line = self._LOG_CONTENT_FORMATTED_WRONG[0]
+        log_content_formatted_wrong_partly = self._LOG_CONTENT[:]
+        log_content_formatted_wrong_partly.append(wrong_line)
+        log_parser = LogParser(log_file_content=log_content_formatted_wrong_partly, report_size=1000)
+        try:
+            log_parser.get_parsed_data()
+        except SystemExit:
+            self.fail('20% errors percent is OK, but an exception was raised')
 
 
 #@unittest.skip("just for developing")

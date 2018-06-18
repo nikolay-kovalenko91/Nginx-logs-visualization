@@ -1,5 +1,7 @@
 import re
+import sys
 import logging
+from typing import List, Generator
 
 from src.parser.median_calc import median
 
@@ -10,6 +12,7 @@ from src.parser.median_calc import median
 
 
 class LogParser:
+    _ALLOWED_PARSE_FAILURES_PERCENT = 30
     _RE_PATTERN = '^(?P<remote_addr>[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}) ' \
                  '(?P<remote_user>[^ ]{1,})  ' \
                  '(?P<http_x_real_ip>[^ ]{1,}|\-) ' \
@@ -27,21 +30,36 @@ class LogParser:
                  '(?P<http_X_RB_USER>[^ ]{1,}) ' \
                  '(?P<request_time>[\d\.]+)$'
 
-    def __init__(self, log_file_content, report_size):
+    def __init__(self, log_file_content: List[str], report_size: int):
         self._log_file_content = log_file_content
         self._report_size = report_size
 
-    def _parse_lines(self, lines):
+    def _exit_on_failures_handler(self, failures_count, total_lines_handled):
+        if total_lines_handled < 5 or not failures_count:
+            return
+        failures_percent = failures_count / total_lines_handled * 100
+        if failures_percent > self._ALLOWED_PARSE_FAILURES_PERCENT:
+            msg = 'There are more than {}% parsing failures while reading log content. Going to quit.'
+            logging.error(msg.format(self._ALLOWED_PARSE_FAILURES_PERCENT))
+            sys.exit()
+
+    def _parse_lines(self, lines: List[str]) -> Generator[dict, None, None]:
+        failures_count = 0
+        total_lines_handled = 0
         for line in lines:
             decoded_line = line.decode('utf-8') if isinstance(line, bytes) else line
             matched_obj = re.match(self._RE_PATTERN, decoded_line)
+            total_lines_handled += 1
             if not matched_obj:
+                failures_count += 1
                 logging.error('Can not recognize line {} in the log'.format(line))
-                continue
-            matching_values = matched_obj.groupdict()
-            yield matching_values
+            else:
+                matching_values = matched_obj.groupdict()
+                yield matching_values
 
-    def _update_single_url_statistic_values(self, item, request_time):
+            self._exit_on_failures_handler(failures_count, total_lines_handled)
+
+    def _update_single_url_statistic_values(self, item: dict, request_time: float) -> None:
         item['time_occurrences'].append(request_time)
         report = item['report']
         report['count'] += 1
@@ -49,7 +67,7 @@ class LogParser:
         time_max = float(report['time_max'])
         report['time_max'] = request_time if request_time > time_max else time_max
 
-    def _calculate_common_statistic_values(self, log_statistic):
+    def _calculate_common_statistic_values(self, log_statistic: dict) -> dict:
         for item in log_statistic['requests'].values():
             report = item['report']
             report['count_perc'] = report['count'] / log_statistic['total_requests_count'] * 100
@@ -58,7 +76,7 @@ class LogParser:
             report['time_med'] = median(item['time_occurrences'])
         return log_statistic
 
-    def _get_raw_requests_values(self, matching_values_list):
+    def _get_raw_requests_values(self, matching_values_list: List[dict]) -> dict:
         log_statistic = {
             'requests': {},
             'total_requests_count': 0,
@@ -96,17 +114,17 @@ class LogParser:
         log_statistic['total_requests_time'] = total_requests_time
         return log_statistic
 
-    def _get_full_statistic(self, matching_values_list):
+    def _get_full_statistic(self, matching_values_list: List[dict]) -> List[dict]:
         log_statistic = self._get_raw_requests_values(matching_values_list)
         full_log_statistic = self._calculate_common_statistic_values(log_statistic=log_statistic)
 
         requests = full_log_statistic['requests']
-        report = [statistic['report'] for statistic in requests.values()]
+        report = (statistic['report'] for statistic in requests.values())
         sorted_report = sorted(report, key=lambda value: value['time_sum'], reverse=True)
         cutted_report = sorted_report[:self._report_size]
         return cutted_report
 
-    def get_parsed_data(self):
+    def get_parsed_data(self) -> List[dict]:
         matching_values_list = self._parse_lines(lines=self._log_file_content)
         log_statistic = self._get_full_statistic(matching_values_list)
 

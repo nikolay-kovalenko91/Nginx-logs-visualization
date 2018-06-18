@@ -13,6 +13,8 @@ def _partition(input_list, random_val):
 
 
 def _top_k(input_list, k):
+    if not len(input_list):
+        return []
     random_val = input_list[random.randrange(len(input_list))]
     (left, middle, right) = _partition(input_list, random_val)
     if len(left) == k:
