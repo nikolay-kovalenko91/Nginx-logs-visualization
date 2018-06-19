@@ -5,8 +5,10 @@ in a html page.
 
 ## Running the app
 The app uses Python 3. To run the app:
+
 1) Create a file ```config.json``` with content ```{}``` in it in the
 project root folder.
+
 2) Create a folder ```reports``` in the root folder.
 Also, you can use a custom folder path. Just declare it in
 ```config.json``` using ```REPORT_DIR``` key.
@@ -18,9 +20,11 @@ config.json:
     "REPORT_DIR": "./reports"
 }
 ```
+
 3) Create a folder ```log``` in the project root or declare a custom
 path in ```config.json``` using ```LOG_DIR``` key. Nginx log files
 should be there. The script will be parse the last log file.
+
 4) Run the script:
 ```
 $ python ./app.py
