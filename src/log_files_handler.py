@@ -6,7 +6,7 @@ import logging
 from os.path import isfile, join
 from os import listdir
 from datetime import datetime
-from typing import List, Generator, TextIO
+from typing import List, Generator, TextIO, Iterable
 
 from src.exceptions import ReportExists, NoLogFilesFound
 from src.utils import catch_file_io_exceptions
@@ -29,6 +29,10 @@ class LogFile:
 
 
 class LogFilesHandler:
+    """
+    Finds the last dated Nginx log, reads its content, and returns it with another
+    log file info.
+    """
     _LOG_DATETIME_NAME_FORMAT = '%Y%m%d'
 
     def __init__(self, log_dir, report_dir):
@@ -49,7 +53,7 @@ class LogFilesHandler:
             msg = 'Wrong datetime format {}{}. Expected {}'.format(date_string, msg_tail, format_string)
             logging.error(msg)
 
-    def _is_report_exist_for_log(self, log_file_info: LogFile, files_paths: List[str]) -> bool:
+    def _is_report_exist_for_log(self, log_file_info: LogFile, files_paths: Iterable[str]) -> bool:
         report_name_re = '^{dir}/report-(20\d{{2}}\.\d{{2}}\.\d{{2}})\.html$'.format(dir=self._report_dir)
         for file_path in files_paths:
             matching_values = re.findall(report_name_re, file_path)
@@ -60,7 +64,7 @@ class LogFilesHandler:
 
         return False
 
-    def _get_last_log_path_to_parse(self, dir_name: str, files_paths: List[str]) -> LogFile:
+    def _get_last_log_path_to_parse(self, dir_name: str, files_paths: Iterable[str]) -> LogFile:
         log_name_re = '^{dir}/nginx-access-ui\.log-(20\d{{6}})\.{{0,1}}(.{{0,2}})$'.format(dir=dir_name)
         log_files = []
         for file_path in files_paths:

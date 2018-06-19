@@ -6,6 +6,9 @@ from src.parser.log_parser import LogParser
 
 
 class LogAnalyzer:
+    """
+    A kind of a connecting link for all the logic
+    """
     def __init__(self, config: dict):
         self._report_size = config['REPORT_SIZE']
         self._report_dir = config['REPORT_DIR']

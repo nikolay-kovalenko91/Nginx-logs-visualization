@@ -8,9 +8,10 @@ import string
 class TestEnvironment:
     def __init__(self, test_running_dir, config_name):
         self._test_running_dir = test_running_dir
-        self._report_dir = "./{}/reports".format(test_running_dir)
-        self._log_dir = "./{}/log".format(test_running_dir)
+        self._report_dir = "./{}/reports_test".format(test_running_dir)
+        self._log_dir = "./{}/log_test".format(test_running_dir)
         self._config_path = "./{}/{}".format(test_running_dir, config_name)
+        self._app_log_path = "./{}/app_log.txt".format(test_running_dir)
 
     def _create_test_dirs(self):
         def create_dir(name):
@@ -24,7 +25,8 @@ class TestEnvironment:
         config = {
             "REPORT_SIZE": 1000,
             "REPORT_DIR": self._report_dir,
-            "LOG_DIR": self._log_dir
+            "LOG_DIR": self._log_dir,
+            "LOG_FILE_PATH": self._app_log_path
         }
         with open(self._config_path, "w") as config_file:
             json.dump(config, config_file, indent=2)

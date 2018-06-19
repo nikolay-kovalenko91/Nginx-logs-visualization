@@ -4,6 +4,9 @@ from src.utils import catch_file_io_exceptions
 
 
 class ReportComposer:
+    """
+    Creates html report page
+    """
     _TEMPLATE_PATH = './templates/report.html'
 
     def __init__(self, log_file_obj, report_dir, table_content):

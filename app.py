@@ -24,6 +24,9 @@ def _get_config(path: str) -> dict:
 
 
 def main() -> None:
+    """
+    Gets current config params and run the main logic
+    """
     external_config_path = os.environ.get('config', default_config_path)
     external_config = _get_config(external_config_path)
     config = {**default_config, **external_config}

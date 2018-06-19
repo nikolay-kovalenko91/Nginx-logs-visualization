@@ -39,7 +39,7 @@ To run the tests, execute in the project folder:
 $ python ./tests/tests.py
 ```
 
-### A format used for logs
+### A format used for parsing Nginx logs
 ```
 $remote_addr $remote_user $http_x_real_ip [$time_local] "$request"
 $status $body_bytes_sent "$http_referer"
