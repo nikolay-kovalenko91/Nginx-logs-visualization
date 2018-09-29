@@ -1,5 +1,4 @@
 import re
-import sys
 import logging
 from typing import List, Generator, Iterable
 
@@ -43,8 +42,7 @@ class LogParser:
         failures_percent = failures_count / total_lines_handled * 100
         if failures_percent > self._ALLOWED_PARSE_FAILURES_PERCENT:
             msg = 'There are more than {}% parsing failures while reading log content. Going to quit.'
-            logging.error(msg.format(self._ALLOWED_PARSE_FAILURES_PERCENT))
-            sys.exit()
+            raise EnvironmentError(msg.format(self._ALLOWED_PARSE_FAILURES_PERCENT))
 
     def _parse_lines(self, lines: List[str]) -> Generator[dict, None, None]:
         failures_count = 0

@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 import json
-from src.log_analyzer import LogAnalyzer
+from src.log_analyzer import log_analyzer
 
 default_config_path = './config.json'
 default_config = {
@@ -20,7 +20,7 @@ def _get_config(path: str) -> dict:
         with open(path) as config_file:
             return json.load(config_file)
     except (IOError, OSError):
-        sys.exit("A config file not found")
+        raise EnvironmentError("A config file not found")
 
 
 def main() -> None:
@@ -37,9 +37,11 @@ def main() -> None:
                         level=logging.INFO)
 
     try:
-        LogAnalyzer(config=config).main()
+        log_analyzer(config)
     except KeyboardInterrupt:
-        logging.error('"Ctrl + C" was pressed. The script is stopped.')
+        logging.error('"Ctrl + C" was pressed. The script was stopped.')
+    except EnvironmentError as e:
+        logging.error('{}\nCritical error occured. The script was stopped.'.format(e))
     except:
         logging.exception('Unknown exception occurred.')
 

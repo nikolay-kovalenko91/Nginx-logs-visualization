@@ -6,7 +6,6 @@ from utils import TestEnvironment, read_file
 import app
 from src.log_files_handler import LogFilesHandler
 from src.parser.log_parser import LogParser
-from src.exceptions import ReportExists, NoLogFilesFound
 
 TEST_CONFIG = {
     'TESTS_RUNNING_DIR': 'sandbox',
@@ -141,7 +140,7 @@ class TestLogParser(unittest.TestCase):
 
     def test_it_quits_if_log_format_is_wrong_100_percent(self):
         log_parser = LogParser(log_file_content=self._LOG_CONTENT_FORMATTED_WRONG, report_size=1000)
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(EnvironmentError):
             log_parser.get_parsed_data()
 
     def test_it_quits_if_log_format_is_wrong_20_percent(self):
@@ -151,7 +150,7 @@ class TestLogParser(unittest.TestCase):
         log_parser = LogParser(log_file_content=log_content_formatted_wrong_partly, report_size=1000)
         try:
             log_parser.get_parsed_data()
-        except SystemExit:
+        except EnvironmentError:
             self.fail('20% errors percent is OK, but an exception was raised')
 
 
@@ -214,7 +213,7 @@ class TestLogfile(unittest.TestCase):
         report_dir = self.test_environment.get_report_dir()
         log_files_handler = LogFilesHandler(log_dir=log_dir, report_dir=report_dir)
 
-        with self.assertRaises(NoLogFilesFound):
+        with self.assertRaises(EnvironmentError):
             log_files_handler.get_file_to_parse()
 
     def test_it_raises_exception_if_logs_have_analyzed_and_report_exists(self):
@@ -234,7 +233,7 @@ class TestLogfile(unittest.TestCase):
         report_dir = self.test_environment.get_report_dir()
         log_files_handler = LogFilesHandler(log_dir=log_dir, report_dir=report_dir)
 
-        with self.assertRaises(ReportExists):
+        with self.assertRaises(EnvironmentError):
             log_files_handler.get_file_to_parse()
 
 
